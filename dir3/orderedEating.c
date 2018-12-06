@@ -1,22 +1,3 @@
-/***************************************************************************************************************
-     PART 3: assign4-part3.c written by Lavell Townsel
-
-Purpose:
-     deadlock problem in the solution for Part 2 will be addressed by using only one global
-     mutex object for synchronization
-
-Command Parameters:
-     gcc -pthread -o assign4p3 assign4-part3.c
-     ./assign4p3 <nthreads>
-     
-     steps to compile & execute this program
-
-Results:
-     *** Please refer to the Report.txt file for further information ***
-
-Notes:
-Returns:
-***************************************************************************************************************/
 #include <stdio.h>//basic functionality of C Program
 #include <stdlib.h>//exit(..),srandom(..),
 #include <string.h>//strerror(..)
@@ -26,7 +7,7 @@ Returns:
 #include <pthread.h>//POSIX thread, POSIX Mutex Usage & Operations
 
 
-// Globals                                                     
+// Globals
 int nthreads;                                   // global num of arguments passed as first parameter in main()
 pthread_mutex_t chopstick = PTHREAD_MUTEX_INITIALIZER;         // mutex lock
 pthread_cond_t v = PTHREAD_COND_INITIALIZER;                   // conditional variable
@@ -44,7 +25,7 @@ void *philosopherActivity(void *threadIndex);
 
 /******************************************* main ****************************************************
 Purpose:
-     process activities of the philosopher threads     
+     process activities of the philosopher threads
 
 Parameters:
      I      int argc                            number of command line args
@@ -55,23 +36,23 @@ Notes:
 
 Returns:
      0                                          function returns successfully
-     -1                                         function returns with error status                   
+     -1                                         function returns with error status
 ******************************************************************************************************/
-int main(int argc, char **argv) 
-{   
+int main(int argc, char **argv)
+{
     if (argc != 2) {   /* check correct number of args passed to program */
         fprintf(stderr, "Usage: %s <nthreads>\n", argv[0]);
         return -1;
     }
     nthreads = atoi(argv[1]);          // convert first argument to an integer and store in var nthreads
     pthread_t tids[nthreads];          // thread array
-    
+
 
     int ndxThread, error;              // thread index & return value for mutex operations
     /* FOR LOOP: threads have to initialize their mutex lock before accessing the mutex for
                  accessing chopstick resource */
     for (ndxThread = 0; ndxThread < nthreads; ++ndxThread) {
-        /* IF-CONDITION: check status of pthread_mutex_init and print an associated error message if 
+        /* IF-CONDITION: check status of pthread_mutex_init and print an associated error message if
                          mutex init failed */
         if (error = pthread_mutex_init(&chopstick, NULL)) {
 	    fprintf(stderr, "Failed to initialize mutex chopstick: %s\n", strerror(error));
@@ -82,7 +63,7 @@ int main(int argc, char **argv)
 
     /* FOR LOOP: initialize the conditional variable for ordered eating
     for (ndxThread = 0; ndxThread < nthreads; ++ndxThread) {
-        // IF-CONDITION: check status of pthread_cond_t and print an associated error message if 
+        // IF-CONDITION: check status of pthread_cond_t and print an associated error message if
                          conditional variable init failed *
         if (error = pthread_cond_init(&v, &cattr)) {
 	    fprintf(stderr, "Failed to initialize conditional v : %s\n", strerror(error));
@@ -91,7 +72,7 @@ int main(int argc, char **argv)
     }
     */
 
-    /* FOR LOOP: for each philosopher thread, create them using the arguments passed in from 
+    /* FOR LOOP: for each philosopher thread, create them using the arguments passed in from
                  threading routine */
     for (ndxThread = 0 ; ndxThread < nthreads ; ++ndxThread) {
         int *args = (int*)malloc(sizeof(int));
@@ -111,7 +92,7 @@ int main(int argc, char **argv)
     /*FOR LOOP: for each philosopher thread, join the created threads by passing each philosopher thread
                 to pthread_join(...) */
     for (ndxThread = 0 ; ndxThread < nthreads ; ++ndxThread) {
-        /* IF-CONDITION: check status of pthread_join abd print an associated error message if 
+        /* IF-CONDITION: check status of pthread_join abd print an associated error message if
                          join failed */
         if (error = pthread_join(tids[ndxThread], NULL)) {
 	    fprintf(stderr, "Failed to join threads: %s\n", strerror(error));
@@ -149,7 +130,7 @@ void thinking()
                      -1 */
     if (error = usleep(usecs))
         fprintf(stderr, "Failed to start thinking: %s\n", strerror(error));
-    
+
     return;
 }
 
@@ -167,7 +148,7 @@ Notes
      - philosopher must acquire both locks before commencing eating
 
      - the print statements help see what is going on more clearer
-     
+
 Returns         None
 ****************************************************************************************************/
 void pickUpChopsticks(int threadIndex)
@@ -192,7 +173,7 @@ Purpose
 Parameters    None
 Notes
      - uses srandom() & random() to seed random number generator, and assign a random number
-       for overall microseconds that a philosopher is eating, respectively 
+       for overall microseconds that a philosopher is eating, respectively
 
 Returns       None
 ****************************************************************************************************/
@@ -208,7 +189,7 @@ void eating()
                      a nonzero value */
     if (error = usleep(usecs))
         fprintf(stderr, "Failed to start eating: %s\n", strerror(error));
-   
+
     return;
 }
 
@@ -220,7 +201,7 @@ Purpose
 Parameters
      I      threadIndex                         current philosopher thread
 
-Notes           
+Notes
      - the print statements help see what is going on more clearer
 
 Returns         None
@@ -240,10 +221,10 @@ void putDownChopsticks(int threadIndex)
 
 /****************************************** philosopherActivity **************************************
 Purpose
-    thread routine for pthread_create and implements the four different actions taken by the 
+    thread routine for pthread_create and implements the four different actions taken by the
     philosophers:  thinking, picking up chopsticks, eating, & putting down chopsticks
 
-Parameters      
+Parameters
     I      threadIndex                          current philosopher thread
 
 Notes
@@ -253,25 +234,25 @@ void *philosopherActivity(void *threadIndex)
 {
     int *thread = (int *) threadIndex;
     printf("Philosopher #%d: start thinking..\n", *thread);
-    thinking();                                   
+    thinking();
     printf("Philosopher #%d: end thinking...\n", *thread);
-    
-    /* Test conditional variable 
+
+    /* Test conditional variable
     WHILE LOOP: while next thread index NOT equal to current thread index, check current thread
                 index to see if matches next thread index then break out to process it if it does */
     while (nextIndex != *thread) {
         // if thread index equals next thread index, then break out and continue executing
-        if (*thread == nextIndex)  
+        if (*thread == nextIndex)
             break;
     }
-    pickUpChopsticks(*thread);      
+    pickUpChopsticks(*thread);
     printf("Philosopher #%d: start eating..\n", *thread);
-    eating();                                          
-    printf("Philosopher #%d: end eating...\n", *thread); 
-    
-    
-    putDownChopsticks(*thread);        
+    eating();
+    printf("Philosopher #%d: end eating...\n", *thread);
+
+
+    putDownChopsticks(*thread);
     nextIndex = nextIndex + 1;               // increment value of nextIndex post-eating
-    
+
     pthread_exit(NULL);
 }
